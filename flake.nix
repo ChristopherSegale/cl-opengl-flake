@@ -15,21 +15,29 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system}.extend cl-nix-lite.overlays.default;
-      inherit (pkgs.lispPackagesLite) lispDerivation;
+      inherit (pkgs.lispPackagesLite) lispDerivation lispMultiDerivation cffi alexandria float-features;
+      inherit (lispMultiDerivation {
+        src = cgl;
+        buildInputs = with pkgs; [ libGL mesa freeglut ];
+        systems = {
+          cl-opengl = {
+            lispDependencies = [ cffi alexandria float-features];
+          };
+          cl-glu = {
+            lispDependencies = [ cffi cl-opengl ];
+          };
+          cl-glut = {
+            lispDependencies = [ alexandria cffi cl-opengl ];
+          };
+          cl-glut-examples = {
+            lispDependencies = [ cffi cl-opengl cl-glu cl-glut ];
+          };
+        };
+      }) cl-opengl cl-glu cl-glut cl-glut-examples;
     in {
       packages = {
-        default = lispDerivation {
-          src = cgl;
-          buildInputs = with pkgs; [
-            libGL
-          ];
-          lispDependencies = with pkgs.lispPackagesLite; [
-            cffi
-            alexandria
-            float-features
-          ];
-          lispSystem = "cl-opengl";
-        };
+        default = cl-opengl;
+        inherit cl-glu cl-glut cl-glut-examples;
       };
     });
 }
