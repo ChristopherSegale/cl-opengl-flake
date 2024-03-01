@@ -18,7 +18,7 @@
       inherit (pkgs.lispPackagesLite) lispDerivation lispMultiDerivation cffi alexandria float-features;
       inherit (lispMultiDerivation {
         src = cgl;
-        buildInputs = with pkgs; [ libGL mesa freeglut ];
+        buildInputs = with pkgs; [ libGL libGLU freeglut ];
         systems = {
           cl-opengl = {
             lispDependencies = [ cffi alexandria float-features];
